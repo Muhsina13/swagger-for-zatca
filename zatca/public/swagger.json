@@ -1,0 +1,275 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "ZATCA ERP Gulf API",
+    "description": "API for ZATCA ERP Gulf integration",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://zatca.erpgulf.com:3717"
+    }
+  ],
+  "paths": {
+    "/api/method/zatca_erpgulf_sync.zatca_erpgulf_sync.invoice_sync.create_simple_sales_invoice": {
+      "post": {
+        "summary": "Create a simple sales invoice",
+        "description": "This endpoint creates a simple sales invoice in the ZATCA ERP Gulf system.",
+        "operationId": "createSimpleSalesInvoice",
+        "parameters": [
+          {
+            "name": "customer_name",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "Grant Plastkicus Ltd."
+          },
+          {
+            "name": "custom_user_invoice_number",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "INV-4566"
+          },
+          {
+            "name": "posting_date",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            },
+            "example": "2025-11-06"
+          },
+          {
+            "name": "due_date",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            },
+            "example": "2025-11-20"
+          },
+          {
+            "name": "items",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "item_code": {
+                    "type": "string",
+                    "example": "ITEM-001"
+                  },
+                  "item_name": {
+                    "type": "string",
+                    "example": "Sample Item"
+                  },
+                  "quantity": {
+                    "type": "number",
+                    "format": "float",
+                    "example": 2.0
+                  },
+                  "rate": {
+                    "type": "number",
+                    "format": "float",
+                    "example": 100.0
+                  },
+                  "income_account": {
+                    "type": "string",
+                    "example": "4410-sales-ZA"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Sample item description"
+                  },
+                  "discount_amount": {
+                    "type": "number",
+                    "format": "float",
+                    "example": 10.0
+                  },
+                  "item_tax_template": {
+                    "type": "string",
+                    "example": "zero rated-ZA"
+                  }
+                },
+                "required": [
+                  "item_code",
+                  "item_name",
+                  "quantity",
+                  "rate",
+                  "income_account",
+                  "description",
+                  "discount_amount",
+                  "item_tax_template",
+                  "item_tax_template"
+                ]
+              }
+            }
+          },
+          {
+            "name": "taxes",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "charge_type": {
+                    "type": "string",
+                    "example": "On Net Total"
+                  },
+                  "account_head": {
+                    "type": "string",
+                    "example": "5118 - Expenses Included In Valuation - ZA"
+                  },
+                  "rate": {
+                    "type": "number",
+                    "format": "float",
+                    "example": 0.0
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "VAT"
+                  },
+                  "included_in_print_rate": {
+                    "type": "integer",
+                    "example": 0
+                  }
+                },
+                "required": [
+                  "charge_type",
+                  "account_head",
+                  "rate",
+                  "description",
+                  "included_in_print_rate"
+                ]
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Invoice created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Invoice created successfully"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "invoice_id": {
+                          "type": "string",
+                          "example": "INV-123456"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "Invalid customer name or items missing"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/method/zatca_erpgulf_sync.zatca_erpgulf_sync.invoice_sync.embed_file_in_pdf": {
+      "get": {
+        "summary": "Embed file in PDF",
+        "description": "This endpoint embeds a file in the PDF of an invoice.",
+        "operationId": "embedFileInPDF",
+        "parameters": [
+          {
+            "name": "invoice_name",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "ACC-SINV-2025-00603"
+          },
+          {
+            "name": "print_format",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "Claudion Invoice Format"
+          },
+          {
+            "name": "language",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "en"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "File embedded successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "File embedded successfully"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "Missing or invalid parameters"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
