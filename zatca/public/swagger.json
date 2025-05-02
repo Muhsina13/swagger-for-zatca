@@ -2,7 +2,7 @@
   "openapi": "3.0.0",
   "info": {
     "title": "ZATCA ERP Gulf API",
-    "description": "API for ZATCA ERP Gulf integration",
+    "description": "**API for ZATCA ERP Gulf integration**.\n\nThese APIs provide functionality that can be used for submitting invoices to ZATCA from a third-party invoicing system. Users need to create an intermediary server on Claudion.com before proceeding with this. For more details and clarifications, [support@claudion.com](https://claudion.com). ",
     "version": "1.0.0"
   },
   "servers": [
@@ -14,7 +14,7 @@
     "/api/method/zatca_erpgulf_sync.zatca_erpgulf_sync.invoice_sync.create_simple_sales_invoice": {
       "post": {
         "summary": "Create a simple sales invoice",
-        "description": "This endpoint creates a simple sales invoice in the ZATCA ERP Gulf system.",
+        "description": "\n\n**This API allows third-party systems to submit invoices to ZATCA through an intermediary server**. It handles all cases, including the first submission and subsequent calls to check the status.\n\nOn first submission, the intermediary server will attempt to post the invoice to ZATCA immediately. In case of success, the intermediary server will respond to the user with the QR code, XML, and full ZATCA response.\n\nIf the intermediary server fails to receive a response from ZATCA immediately, it will respond with a \"Waiting for Response\" status.\nFor any subsequent calls for the same invoice, the intermediary server will respond with the QR code, XML, and ZATCA response if available. Otherwise, it will return either a \"Pending\" or \"Error\" status. In such cases, the user needs to either re-submit (in case of \"Pending\") or correct the error (in case of \"Error\").\n\n**Details are as follows:**\nThis API allows users to create and submit a Sales Invoice by providing customer details, a unique invoice number, items, taxes, and other relevant parameters. Upon successful creation, the invoice is submitted to ZATCA and the API returns the Sales Invoice number, UUID, ZATCA response, generated XML, and a link to download the QR code image.\n\n**Functionality:**\n\n**1**. If an invoice with the provided custom_user_invoice_number already exists in the system, the API will fetch the corresponding Sales Invoice, extract and decode the associated ZATCA XML, and retrieve the link to download the QR image. Instead of creating a new invoice, it returns the existing invoice details in the response with a 200 status, ensuring no duplicates are created and allowing clients to reuse previously submitted data.\n\n**2**. If a customer with the provided name does not already exist, the API will automatically create a new Customer record, defaulting the customer type to \"Individual\" and assigning them to the \"Demo Customer Group\".\n\n**3**. For each item in the provided list, the API checks whether the item exists in the system. If not, it automatically creates the item under the \"All Item Groups\" category. Key fields such as description, price, tax template, and income account are validated to ensure completeness before adding the item to the invoice.\n\n**4**. The API constructs a new Sales Invoice using the provided customer, posting date, and due date. It includes all specified line items along with any tax configurations applied. Optional discounts can be set either as a percentage or a fixed amount. Additionally, custom fields such as custom_user_invoice_number and custom_zatca_tax_category are included to support personalized tracking and ZATCA compliance.\n\n**5**. Once the invoice is submitted, the system reloads it to check for a ZATCA response. If ZATCA returns a \"503 Service Unavailable\" error, the API responds with a 503 status and includes the UUID along with the full ZATCA response. If there is no response from ZATCA yet, it returns a 202 Accepted status with the message \"Waiting for response.\" In such cases, if the API is called again with the same custom_user_invoice_number, it will return the same invoice details. If ZATCA responds successfully, the API extracts and decodes the XML, embeds the QR image (via direct link), and returns all relevant fields in the final JSON response.\n\n**6**. If is_return is set to 1, the API creates a Return Sales Invoice (Credit Note) linked to the original invoice using the return_against field. It ensures that return_against is provided, and automatically converts all item quantities to negative values to represent a return. This process maintains correct stock, customer balances, and full traceability between the original and returned invoices.\n\n**7**. The API supports applying discounts at both the item level (per line item) and the document level (overall invoice discount). Taxes can be applied either through the Item Tax Template (specific to each item) or by setting a general Tax Category at the invoice level, along with an optional Exemption Reason Code to comply with specific tax regulations.\n\n**8**. The API allows handling both tax-inclusive and tax-exclusive item rates. If the tax setting included_in_print_rate is set to 1, the item prices are treated as tax-inclusive (i.e., tax is already included in the item rate). If included_in_print_rate is 0 or not set, the item prices are considered tax-exclusive, and taxes are added separately on top of the item rate during invoice calculation.\n\n**9**. If income_account, charge_type, or account_head are not provided in the API request, the system will automatically fall back to values defined in the Intermediate Server Setting single Doctype.\n\n**10**. In the create_simple_sales_invoice API, the tax_id parameter is used to set the customer's tax identification number. This field is applied when the invoice is for a business (i.e., is_b2c is set to 0). If the customer does not already exist, the API will create a new customer and assign the provided tax_id for B2B transactions. For B2C transactions (is_b2c = 1), the tax_id can be blank.",
         "operationId": "createSimpleSalesInvoice",
         "parameters": [
           {
@@ -115,9 +115,8 @@
               "default": false
             },
             "description": "Is Return (Credit Note)"
-          }
-          
-          ,
+          },
+
           {
             "name": "return_against",
             "in": "query",
@@ -169,7 +168,7 @@
                     "format": "float",
                     "example": 10.0
                   },
-                  
+
                   "item_tax_template": {
                     "type": "string",
                     "example": "zero rated-ZA"
@@ -188,7 +187,6 @@
             },
             "description": "include item_tax_template parameter, only if invoice is with item_tax"
           },
-          
 
           {
             "name": "taxes",
@@ -230,7 +228,7 @@
                 ]
               }
             },
-            "description" : "Inclusive invoice:included_in_print_rate=1, Exclusive invoice: included_in_print_rate=0"
+            "description": "Inclusive invoice:included_in_print_rate=1, Exclusive invoice: included_in_print_rate=0"
           }
         ],
         "responses": {
@@ -278,11 +276,11 @@
         }
       }
     },
-    
+
     "/api/method/zatca_erpgulf_sync.zatca_erpgulf_sync.invoice_sync.embed_file_in_pdf": {
       "get": {
-        "summary": "Embed file in PDF",
-        "description": "This endpoint embeds a file in the PDF of an invoice.",
+        "summary": "Download PDF/A-3",
+        "description": "\n\n**This API generates a PDF/A-3 version of a Sales Invoice by accepting the invoice number, print format, and language as input parameters. It embeds the related XML into the PDF and returns a download link to the generated PDF/A-3 file**.\n\n### Key Features of PDF/A-3:\n\n**1. Compliance with ZATCA Guidelines**  \n• PDF/A-3 is mandated by ZATCA for e-invoicing because it ensures invoices are digitally preserved in a non-editable format while supporting embedded machine-readable data, like XML files (UBL format).\n\n**2. Embedded Attachments**  \n• PDF/A-3 allows embedding of additional files, such as XML data for e-invoicing. This is crucial for ZATCA compliance, as invoices need to include a human-readable PDF and machine-readable XML data in one file.\n\n**3. Long-Term Archiving**  \n• The format ensures that invoices remain readable and unalterable over time, meeting regulatory and auditing requirements.\n\n**4. Integration with Business Systems**  \n• By supporting both visual presentation and data integration, PDF/A-3 enables seamless sharing and processing of invoices in enterprise systems and tax portals.",
         "operationId": "embedFileInPDF",
         "parameters": [
           {
