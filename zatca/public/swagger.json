@@ -36,6 +36,15 @@
             "example": "INV-4566"
           },
           {
+            "name": "tax_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "number"
+            },
+            "example": 311523216200003
+          },
+          {
             "name": "posting_date",
             "in": "query",
             "required": true,
@@ -55,6 +64,71 @@
             },
             "example": "2025-11-20"
           },
+          {
+            "name": "discount_amount",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "number"
+            },
+            "description": "Discount amount",
+            "example": 10
+          },
+
+          {
+            "name": "tax_category",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "required in the case of without_item_tax_template",
+            "example": "Standard"
+          },
+
+          {
+            "name": "custom_exemption_reason_code",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Required in the case of  without item_tax_template",
+            "example": "Standard 15%"
+          },
+          {
+            "name": "is_b2c",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "Whether the invoice is B2C (true) or B2B (false)",
+            "example": false
+          },
+          {
+            "name": "is_return",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            },
+            "description": "Is Return (Credit Note)"
+          }
+          
+          ,
+          {
+            "name": "return_against",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": " Required in the case of  'is_return' is true",
+            "example": "ACC-SINV-2025-00666"
+          },
+
           {
             "name": "items",
             "in": "query",
@@ -95,6 +169,7 @@
                     "format": "float",
                     "example": 10.0
                   },
+                  
                   "item_tax_template": {
                     "type": "string",
                     "example": "zero rated-ZA"
@@ -107,13 +182,14 @@
                   "rate",
                   "income_account",
                   "description",
-                  "discount_amount",
-                  "item_tax_template",
-                  "item_tax_template"
+                  "discount_amount"
                 ]
               }
-            }
+            },
+            "description": "include item_tax_template parameter, only if invoice is with item_tax"
           },
+          
+
           {
             "name": "taxes",
             "in": "query",
@@ -153,7 +229,8 @@
                   "included_in_print_rate"
                 ]
               }
-            }
+            },
+            "description" : "Inclusive invoice:included_in_print_rate=1, Exclusive invoice: included_in_print_rate=0"
           }
         ],
         "responses": {
@@ -201,6 +278,7 @@
         }
       }
     },
+    
     "/api/method/zatca_erpgulf_sync.zatca_erpgulf_sync.invoice_sync.embed_file_in_pdf": {
       "get": {
         "summary": "Embed file in PDF",
